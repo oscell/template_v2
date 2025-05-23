@@ -16,7 +16,7 @@ export function CustomRefinementList(props) {
   } = useRefinementList(props);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mb-6">
       <Input
         type="search"
         placeholder="Search filters..."

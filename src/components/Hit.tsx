@@ -1,6 +1,5 @@
-import { useHits } from "react-instantsearch";
-
-import { Highlight } from "react-instantsearch";
+import { useHits, Highlight } from "react-instantsearch";
+import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardDescription,
@@ -9,39 +8,55 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import type { Hit } from "algoliasearch";
+interface ProductHit {
+  name: string;
+  description: string;
+  image: string;
+  price: number;
+  objectID: string;
+  __position: number;
+  __queryID?: string;
+}
 
 type HitProps = {
-  hit: Hit;
+  hit: ProductHit;
 };
 
 function Hit({ hit }: HitProps) {
+  const navigate = useNavigate();
 
   return (
-    <Card className="h-full">
+    <Card
+      className="h-full cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={() => navigate(`/product/${hit.objectID}`)}
+    >
       <CardHeader>
         <CardTitle>
           <Highlight attribute="name" hit={hit} />
         </CardTitle>
 
-        <img
-          src={hit.image as string}
-        />
+        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+          <img
+            src={hit.image}
+            alt={hit.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
 
         <CardDescription>
           <Highlight attribute="description" hit={hit} />
         </CardDescription>
       </CardHeader>
 
-      <CardFooter className="flex justify-between"></CardFooter>
+      <CardFooter className="flex justify-between">
+        <span className="text-lg font-semibold">${hit.price}</span>
+      </CardFooter>
     </Card>
   );
 }
 
-export function CustomHits(props: any) {
-  const { items } = useHits<Hit>(props);
-  console.log("Algolia Hits:", items); // Log all hits here
-
+export function CustomHits() {
+  const { items } = useHits<ProductHit>();
 
   return (
     <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
