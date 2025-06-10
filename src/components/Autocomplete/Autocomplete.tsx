@@ -236,7 +236,7 @@ function createHitPlugin(searchClient: SearchClient) {
                 searchParams: {
                   query,
                   hitsPerPage: 6,
-                  attributesToSnippet: ["name:10", "description:15"], // Adjust attributes as needed
+                  attributesToSnippet: ["name:10"], // Adjust attributes as needed
                   snippetEllipsisText: "…",
                 },
               })
@@ -260,7 +260,7 @@ function createHitPlugin(searchClient: SearchClient) {
             },
             item({ item, components }) {
               return (
-                <div className="aa-ItemWrapper">
+                <div className="aa-ItemWrapper flex flex-col items-center">
                   <a
                     href={item.url || `/items/${item.objectID}`}
                     className="aa-ItemLink"
@@ -279,30 +279,6 @@ function createHitPlugin(searchClient: SearchClient) {
                         />
                       </div>
                       <div className="aa-ItemContentBody">
-                        <div className="aa-ItemContentTitle">
-                          {components ? (
-                            <components.Snippet hit={item} attribute="name" />
-                          ) : (
-                            item.name || item.title
-                          )}
-                        </div>
-                        {item.description && (
-                          <div className="aa-ItemContentDescription">
-                            {components ? (
-                              <components.Snippet
-                                hit={item}
-                                attribute="description"
-                              />
-                            ) : (
-                              item.description
-                            )}
-                          </div>
-                        )}
-                        {item.category && (
-                          <div className="aa-ItemContentDescription">
-                            Category: <strong>{item.category}</strong>
-                          </div>
-                        )}
                         {item.price && (
                           <div
                             className="aa-ItemContentDescription"
@@ -311,54 +287,14 @@ function createHitPlugin(searchClient: SearchClient) {
                             <strong>${item.price.toLocaleString()}</strong>
                           </div>
                         )}
+                        <div className="aa-ItemContentTitle">
+                          {components ? (
+                            <components.Snippet hit={item} attribute="name" />
+                          ) : (
+                            item.name || item.title
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    <div className="aa-ItemActions">
-                      <button
-                        className="aa-ItemActionButton aa-DesktopOnly aa-ActiveOnly"
-                        type="button"
-                        title="Select"
-                        style={{ pointerEvents: "none" }}
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          width="20"
-                          height="20"
-                          fill="currentColor"
-                        >
-                          <path d="M18.984 6.984h2.016v6h-15.188l3.609 3.609-1.406 1.406-6-6 6-6 1.406 1.406-3.609 3.609h13.172v-4.031z" />
-                        </svg>
-                      </button>
-                      {/* Add custom action button if needed */}
-                      <button
-                        className="aa-ItemActionButton"
-                        type="button"
-                        title="Add to favorites"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-
-                          // Add your custom action here
-                          console.log("Item favorited:", item);
-
-                          // If you have insights tracking, you can add it here
-                          // insights.convertedObjectIDsAfterSearch({
-                          //   eventName: 'Added to favorites',
-                          //   index: item.__autocomplete_indexName,
-                          //   objectIDs: [item.objectID],
-                          //   queryID: item.__autocomplete_queryID,
-                          // });
-                        }}
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          width="18"
-                          height="18"
-                          fill="currentColor"
-                        >
-                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                        </svg>
-                      </button>
                     </div>
                   </a>
                 </div>
@@ -416,16 +352,15 @@ function createMerchPlugin(searchClient: SearchClient) {
                     className="aa-ItemLink"
                   >
                     <div className="aa-ItemContent">
-                        <img
-                          src={
-                            item.image ||
-                            item.imageUrl ||
-                            "/placeholder-image.jpg"
-                          }
-                          alt={item.name || item.title || "Item"}
-                          className=" object-cover"
-                        />
-
+                      <img
+                        src={
+                          item.image ||
+                          item.imageUrl ||
+                          "/placeholder-image.jpg"
+                        }
+                        alt={item.name || item.title || "Item"}
+                        className="max-w-full h-72 rounded-md object-cover mx-auto"
+                      />
                     </div>
                   </a>
                 </div>
@@ -616,17 +551,6 @@ export function Autocomplete({
               .aa-Source[data-autocomplete-source-id='merchPlugin'] .aa-ItemWrapper:hover {
                 background-color: rgb(249 250 251);
               }
-      
-              .aa-Source[data-autocomplete-source-id='hitPlugin'] img,
-              .aa-Source[data-autocomplete-source-id='merchPlugin'] img {
-                max-width: 100%;
-                height: 80px;
-                border-radius: 0.375rem;
-                object-fit: cover;
-                display: block;
-                margin: 0 auto;
-              }
-
               /* Style the left section sources */
               .aa-PanelSection--left .aa-Source {
                 margin-bottom: 1rem;
