@@ -3,6 +3,10 @@ import { CustomSearchBox } from "./SearchBar";
 import { CustomPagination } from "./CustomPagination";
 import { CustomRefinementList } from "./CustomRefinementList";
 import { DynamicWidgets } from "react-instantsearch";
+import { AutocompleteSearchBox } from "./SearchBar";
+import { Autocomplete } from "./Autocomplete/Autocomplete";
+import { searchClient, future, indexName } from "../lib/algolia";
+
 
 
 
@@ -12,10 +16,20 @@ export function SearchPage() {
 
       <div className="mb-4 flex justify-center">
         <div className="w-full max-w-md">
-          <CustomSearchBox
+          {/* <CustomSearchBox
             placeholder="Search products..."
             className="w-full"
+          /> */}
+          {/* <AutocompleteSearchBox
+            placeholder="Search products..."
+            className="w-full"
+          /> */}
+          <Autocomplete
+            placeholder="Search products..."
+            className="w-full"
+            searchClient={searchClient}
           />
+
         </div>
       </div>
 

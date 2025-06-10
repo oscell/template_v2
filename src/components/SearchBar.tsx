@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
 import { Input } from "@/components/ui/input";
-import { useState, useRef } from 'react';
-import {  useSearchBox } from 'react-instantsearch';
-import type { SearchBoxProps } from 'react-instantsearch';
+import { useState, useRef } from "react";
+import { useSearchBox} from "react-instantsearch";
+import type { SearchBoxProps } from "react-instantsearch";
+
 
 export function CustomSearchBox(props: SearchBoxProps) {
   const { query, refine } = useSearchBox(props);
