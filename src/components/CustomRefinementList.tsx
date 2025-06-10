@@ -1,11 +1,11 @@
-import React from 'react';
 import { useRefinementList } from 'react-instantsearch';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import type { RefinementListProps } from 'react-instantsearch';
 
-export function CustomRefinementList(props) {
+export function CustomRefinementList(props: RefinementListProps) {
   const {
     items,
     refine,

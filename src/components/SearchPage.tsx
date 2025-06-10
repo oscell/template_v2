@@ -24,8 +24,8 @@ export function SearchPage() {
         {/* Filters - take up to 1/3 */}
         <div className="w-full max-w-xs">
           <DynamicWidgets>
-            <CustomRefinementList attribute="subcategories" />
-            <CustomRefinementList attribute="color" />
+            <CustomRefinementList attribute="categories" />
+            <CustomRefinementList attribute="brand" />
             <CustomRefinementList attribute="price" />
           </DynamicWidgets>
         </div>
