@@ -1,6 +1,6 @@
-import type { SearchClient } from 'algoliasearch';
-import type { BaseItem } from '@algolia/autocomplete-core';
-import type { AutocompleteOptions } from '@algolia/autocomplete-js';
+import type { SearchClient } from "algoliasearch";
+import type { BaseItem } from "@algolia/autocomplete-core";
+import type { AutocompleteOptions } from "@algolia/autocomplete-js";
 
 import {
   createElement,
@@ -9,26 +9,26 @@ import {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { createRoot, Root } from 'react-dom/client';
+} from "react";
+import { createRoot, Root } from "react-dom/client";
 
 import {
   useHierarchicalMenu,
   usePagination,
   useSearchBox,
-} from 'react-instantsearch';
-import { autocomplete } from '@algolia/autocomplete-js';
-import { createLocalStorageRecentSearchesPlugin } from '@algolia/autocomplete-plugin-recent-searches';
-import { createQuerySuggestionsPlugin } from '@algolia/autocomplete-plugin-query-suggestions';
-import { debounce } from '@algolia/autocomplete-shared';
+} from "react-instantsearch";
+import { autocomplete } from "@algolia/autocomplete-js";
+import { createLocalStorageRecentSearchesPlugin } from "@algolia/autocomplete-plugin-recent-searches";
+import { createQuerySuggestionsPlugin } from "@algolia/autocomplete-plugin-query-suggestions";
+import { debounce } from "@algolia/autocomplete-shared";
 
 import {
   INSTANT_SEARCH_HIERARCHICAL_ATTRIBUTES,
   INSTANT_SEARCH_INDEX_NAME,
   INSTANT_SEARCH_QUERY_SUGGESTIONS,
-} from './constants';
+} from "./constants";
 
-import '@algolia/autocomplete-theme-classic';
+import "@algolia/autocomplete-theme-classic";
 
 type AutocompleteProps = Partial<AutocompleteOptions<BaseItem>> & {
   searchClient: SearchClient;
@@ -55,7 +55,7 @@ interface Item {
 
 function createRecentSearchesPlugin(setInstantSearchUiState) {
   return createLocalStorageRecentSearchesPlugin({
-    key: 'instantsearch',
+    key: "instantsearch",
     limit: 3,
     transformSource({ source }) {
       return {
@@ -71,17 +71,21 @@ function createRecentSearchesPlugin(setInstantSearchUiState) {
   });
 }
 
-function createQuerySuggestionsInCategoryPluginLocal(searchClient: SearchClient, currentCategory: string | undefined, setInstantSearchUiState: (options: SetInstantSearchUiStateOptions) => void) {
+function createQuerySuggestionsInCategoryPluginLocal(
+  searchClient: SearchClient,
+  currentCategory: string | undefined,
+  setInstantSearchUiState: (options: SetInstantSearchUiStateOptions) => void
+) {
   const recentSearches = createLocalStorageRecentSearchesPlugin({
-    key: 'instantsearch',
+    key: "instantsearch",
     limit: 3,
     transformSource({ source }: { source: Source }) {
       return {
         ...source,
         onSelect({ item }: { item: Item }) {
           setInstantSearchUiState({
-            query: item.label || '',
-            category: item.category || '',
+            query: item.label || "",
+            category: item.category || "",
           });
         },
       };
@@ -94,19 +98,21 @@ function createQuerySuggestionsInCategoryPluginLocal(searchClient: SearchClient,
     getSearchParams() {
       return recentSearches.data!.getAlgoliaSearchParams({
         hitsPerPage: 3,
-        facetFilters: currentCategory ? [
-          `${INSTANT_SEARCH_INDEX_NAME}.facets.exact_matches.${INSTANT_SEARCH_HIERARCHICAL_ATTRIBUTES[0]}.value:${currentCategory}`,
-        ] : [],
+        facetFilters: currentCategory
+          ? [
+              `${INSTANT_SEARCH_INDEX_NAME}.facets.exact_matches.${INSTANT_SEARCH_HIERARCHICAL_ATTRIBUTES[0]}.value:${currentCategory}`,
+            ]
+          : [],
       });
     },
     transformSource({ source }: { source: Source }) {
       return {
         ...source,
-        sourceId: 'querySuggestionsInCategoryPlugin',
+        sourceId: "querySuggestionsInCategoryPlugin",
         onSelect({ item }: { item: Item }) {
           setInstantSearchUiState({
-            query: item.query || '',
-            category: item.__autocomplete_qsCategory || '',
+            query: item.query || "",
+            category: item.__autocomplete_qsCategory || "",
           });
         },
         getItems(params: any) {
@@ -136,17 +142,21 @@ function createQuerySuggestionsInCategoryPluginLocal(searchClient: SearchClient,
   });
 }
 
-function createQuerySuggestionsPluginLocal(searchClient: SearchClient, currentCategory: string | undefined, setInstantSearchUiState: (options: SetInstantSearchUiStateOptions) => void) {
+function createQuerySuggestionsPluginLocal(
+  searchClient: SearchClient,
+  currentCategory: string | undefined,
+  setInstantSearchUiState: (options: SetInstantSearchUiStateOptions) => void
+) {
   const recentSearches = createLocalStorageRecentSearchesPlugin({
-    key: 'instantsearch',
+    key: "instantsearch",
     limit: 3,
     transformSource({ source }: { source: Source }) {
       return {
         ...source,
         onSelect({ item }: { item: Item }) {
           setInstantSearchUiState({
-            query: item.label || '',
-            category: item.category || '',
+            query: item.label || "",
+            category: item.category || "",
           });
         },
       };
@@ -171,18 +181,18 @@ function createQuerySuggestionsPluginLocal(searchClient: SearchClient, currentCa
     },
     categoryAttribute: [
       INSTANT_SEARCH_INDEX_NAME,
-      'facets',
-      'exact_matches',
+      "facets",
+      "exact_matches",
       INSTANT_SEARCH_HIERARCHICAL_ATTRIBUTES[0],
     ],
     transformSource({ source }: { source: Source }) {
       return {
         ...source,
-        sourceId: 'querySuggestionsPlugin',
+        sourceId: "querySuggestionsPlugin",
         onSelect({ item }: { item: Item }) {
           setInstantSearchUiState({
-            query: item.query || '',
-            category: item.__autocomplete_qsCategory || '',
+            query: item.query || "",
+            category: item.__autocomplete_qsCategory || "",
           });
         },
         getItems(params: any) {
@@ -210,256 +220,300 @@ function createQuerySuggestionsPluginLocal(searchClient: SearchClient, currentCa
 }
 
 function createHitPlugin(searchClient: SearchClient) {
-    return {
-      getSources() {
-        return [
-          {
-            sourceId: 'hitPlugin',
-            getItems({ query }) {
-              if (!query) {
-                return [];
+  return {
+    getSources() {
+      return [
+        {
+          sourceId: "hitPlugin",
+          getItems({ query }) {
+            if (!query) {
+              return [];
+            }
+
+            return searchClient
+              .searchSingleIndex({
+                indexName: "instant_search", // Replace with your items index name
+                searchParameters: {
+                  query,
+                  hitsPerPage: 5,
+                  attributesToSnippet: ["name:10", "description:15"], // Adjust attributes as needed
+                  snippetEllipsisText: "…",
+                },
+              })
+              .then(({ hits }) => hits);
+          },
+          getItemUrl({ item }) {
+            return item.url || `/items/${item.objectID}`;
+          },
+          templates: {
+            header({ items }) {
+              if (items.length === 0) {
+                return "";
               }
-  
-              return searchClient
-                .searchSingleIndex({
-                  indexName: 'instant_search', // Replace with your items index name
-                  searchParameters: {
-                    query,
-                    hitsPerPage: 5,
-                    attributesToSnippet: ['name:10', 'description:15'], // Adjust attributes as needed
-                    snippetEllipsisText: '…',
-                  },
-                })
-                .then(({ hits }) => hits);
+
+              return (
+                <Fragment>
+                  <span className="aa-SourceHeaderTitle">Items</span>
+                  <span className="aa-SourceHeaderLine"></span>
+                </Fragment>
+              );
             },
-            getItemUrl({ item }) {
-              return item.url || `/items/${item.objectID}`;
-            },
-            templates: {
-              header({ items }) {
-                if (items.length === 0) {
-                  return '';
-                }
-  
-                return (
-                  <Fragment>
-                    <span className="aa-SourceHeaderTitle">Items</span>
-                    <span className="aa-SourceHeaderLine"></span>
-                  </Fragment>
-                );
-              },
-              item({ item, components }) {
-                return (
-                  <div className="aa-ItemWrapper">
-                    <a href={item.url || `/items/${item.objectID}`} className="aa-ItemLink">
-                      <div className="aa-ItemContent">
-                        <div className="aa-ItemIcon aa-ItemIcon--picture aa-ItemIcon--alignTop">
-                          <img
-                            src={item.image || item.imageUrl || '/placeholder-image.jpg'}
-                            alt={item.name || item.title || 'Item'}
-                            width="40"
-                            height="40"
-                          />
+            item({ item, components }) {
+              return (
+                <div className="aa-ItemWrapper">
+                  <a
+                    href={item.url || `/items/${item.objectID}`}
+                    className="aa-ItemLink"
+                  >
+                    <div className="aa-ItemContent">
+                      <div className="aa-ItemIcon aa-ItemIcon--picture aa-ItemIcon--alignTop">
+                        <img
+                          src={
+                            item.image ||
+                            item.imageUrl ||
+                            "/placeholder-image.jpg"
+                          }
+                          alt={item.name || item.title || "Item"}
+                          width="40"
+                          height="40"
+                        />
+                      </div>
+                      <div className="aa-ItemContentBody">
+                        <div className="aa-ItemContentTitle">
+                          {components ? (
+                            <components.Snippet hit={item} attribute="name" />
+                          ) : (
+                            item.name || item.title
+                          )}
                         </div>
-                        <div className="aa-ItemContentBody">
-                          <div className="aa-ItemContentTitle">
+                        {item.description && (
+                          <div className="aa-ItemContentDescription">
                             {components ? (
-                              <components.Snippet hit={item} attribute="name" />
+                              <components.Snippet
+                                hit={item}
+                                attribute="description"
+                              />
                             ) : (
-                              item.name || item.title
+                              item.description
                             )}
                           </div>
-                          {item.description && (
-                            <div className="aa-ItemContentDescription">
-                              {components ? (
-                                <components.Snippet hit={item} attribute="description" />
-                              ) : (
-                                item.description
-                              )}
-                            </div>
-                          )}
-                          {item.category && (
-                            <div className="aa-ItemContentDescription">
-                              Category: <strong>{item.category}</strong>
-                            </div>
-                          )}
-                          {item.price && (
-                            <div className="aa-ItemContentDescription" style={{ color: '#000' }}>
-                              <strong>${item.price.toLocaleString()}</strong>
-                            </div>
-                          )}
-                        </div>
+                        )}
+                        {item.category && (
+                          <div className="aa-ItemContentDescription">
+                            Category: <strong>{item.category}</strong>
+                          </div>
+                        )}
+                        {item.price && (
+                          <div
+                            className="aa-ItemContentDescription"
+                            style={{ color: "#000" }}
+                          >
+                            <strong>${item.price.toLocaleString()}</strong>
+                          </div>
+                        )}
                       </div>
-                      <div className="aa-ItemActions">
-                        <button
-                          className="aa-ItemActionButton aa-DesktopOnly aa-ActiveOnly"
-                          type="button"
-                          title="Select"
-                          style={{ pointerEvents: 'none' }}
+                    </div>
+                    <div className="aa-ItemActions">
+                      <button
+                        className="aa-ItemActionButton aa-DesktopOnly aa-ActiveOnly"
+                        type="button"
+                        title="Select"
+                        style={{ pointerEvents: "none" }}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="20"
+                          height="20"
+                          fill="currentColor"
                         >
-                          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                            <path d="M18.984 6.984h2.016v6h-15.188l3.609 3.609-1.406 1.406-6-6 6-6 1.406 1.406-3.609 3.609h13.172v-4.031z" />
-                          </svg>
-                        </button>
-                        {/* Add custom action button if needed */}
-                        <button
-                          className="aa-ItemActionButton"
-                          type="button"
-                          title="Add to favorites"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            
-                            // Add your custom action here
-                            console.log('Item favorited:', item);
-                            
-                            // If you have insights tracking, you can add it here
-                            // insights.convertedObjectIDsAfterSearch({
-                            //   eventName: 'Added to favorites',
-                            //   index: item.__autocomplete_indexName,
-                            //   objectIDs: [item.objectID],
-                            //   queryID: item.__autocomplete_queryID,
-                            // });
-                          }}
+                          <path d="M18.984 6.984h2.016v6h-15.188l3.609 3.609-1.406 1.406-6-6 6-6 1.406 1.406-3.609 3.609h13.172v-4.031z" />
+                        </svg>
+                      </button>
+                      {/* Add custom action button if needed */}
+                      <button
+                        className="aa-ItemActionButton"
+                        type="button"
+                        title="Add to favorites"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+
+                          // Add your custom action here
+                          console.log("Item favorited:", item);
+
+                          // If you have insights tracking, you can add it here
+                          // insights.convertedObjectIDsAfterSearch({
+                          //   eventName: 'Added to favorites',
+                          //   index: item.__autocomplete_indexName,
+                          //   objectIDs: [item.objectID],
+                          //   queryID: item.__autocomplete_queryID,
+                          // });
+                        }}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="18"
+                          height="18"
+                          fill="currentColor"
                         >
-                          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                          </svg>
-                        </button>
-                      </div>
-                    </a>
-                  </div>
-                );
-              },
+                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </a>
+                </div>
+              );
             },
           },
-        ];
-      },
-    };
-  }
+        },
+      ];
+    },
+  };
+}
 
+function createMerchPlugin(searchClient: SearchClient) {
+  return {
+    getSources() {
+      return [
+        {
+          sourceId: "merchPlugin",
+          getItems({ query }) {
+            if (!query) {
+              return [];
+            }
 
-  function createMerchPlugin(searchClient: SearchClient) {
-    return {
-      getSources() {
-        return [
-          {
-            sourceId: 'merchPlugin',
-            getItems({ query }) {
-              if (!query) {
-                return [];
+            return searchClient
+              .searchSingleIndex({
+                indexName: "instant_search", // Replace with your items index name
+                searchParameters: {
+                  query,
+                  hitsPerPage: 5,
+                  attributesToSnippet: ["name:10", "description:15"], // Adjust attributes as needed
+                  snippetEllipsisText: "…",
+                },
+              })
+              .then(({ hits }) => hits);
+          },
+          getItemUrl({ item }) {
+            return item.url || `/items/${item.objectID}`;
+          },
+          templates: {
+            header({ items }) {
+              if (items.length === 0) {
+                return "";
               }
-  
-              return searchClient
-                .searchSingleIndex({
-                  indexName: 'instant_search', // Replace with your items index name
-                  searchParameters: {
-                    query,
-                    hitsPerPage: 5,
-                    attributesToSnippet: ['name:10', 'description:15'], // Adjust attributes as needed
-                    snippetEllipsisText: '…',
-                  },
-                })
-                .then(({ hits }) => hits);
+
+              return (
+                <Fragment>
+                  <span className="aa-SourceHeaderTitle">Items</span>
+                  <span className="aa-SourceHeaderLine"></span>
+                </Fragment>
+              );
             },
-            getItemUrl({ item }) {
-              return item.url || `/items/${item.objectID}`;
-            },
-            templates: {
-              header({ items }) {
-                if (items.length === 0) {
-                  return '';
-                }
-  
-                return (
-                  <Fragment>
-                    <span className="aa-SourceHeaderTitle">Items</span>
-                    <span className="aa-SourceHeaderLine"></span>
-                  </Fragment>
-                );
-              },
-              item({ item, components }) {
-                return (
-                  <div className="aa-ItemWrapper">
-                    <a href={item.url || `/items/${item.objectID}`} className="aa-ItemLink">
-                      <div className="aa-ItemContent">
-                        <div className="aa-ItemIcon aa-ItemIcon--picture aa-ItemIcon--alignTop">
-                          <img
-                            src={item.image || item.imageUrl || '/placeholder-image.jpg'}
-                            alt={item.name || item.title || 'Item'}
-                            width="40"
-                            height="40"
-                          />
+            item({ item, components }) {
+              return (
+                <div className="aa-ItemWrapper">
+                  <a
+                    href={item.url || `/items/${item.objectID}`}
+                    className="aa-ItemLink"
+                  >
+                    <div className="aa-ItemContent">
+                      <div className="aa-ItemIcon aa-ItemIcon--picture aa-ItemIcon--alignTop">
+                        <img
+                          src={
+                            item.image ||
+                            item.imageUrl ||
+                            "/placeholder-image.jpg"
+                          }
+                          alt={item.name || item.title || "Item"}
+                          width="40"
+                          height="40"
+                        />
+                      </div>
+                      <div className="aa-ItemContentBody">
+                        <div className="aa-ItemContentTitle">
+                          {components ? (
+                            <components.Snippet hit={item} attribute="name" />
+                          ) : (
+                            item.name || item.title
+                          )}
                         </div>
-                        <div className="aa-ItemContentBody">
-                          <div className="aa-ItemContentTitle">
+                        {item.description && (
+                          <div className="aa-ItemContentDescription">
                             {components ? (
-                              <components.Snippet hit={item} attribute="name" />
+                              <components.Snippet
+                                hit={item}
+                                attribute="description"
+                              />
                             ) : (
-                              item.name || item.title
+                              item.description
                             )}
                           </div>
-                          {item.description && (
-                            <div className="aa-ItemContentDescription">
-                              {components ? (
-                                <components.Snippet hit={item} attribute="description" />
-                              ) : (
-                                item.description
-                              )}
-                            </div>
-                          )}
-                          {item.category && (
-                            <div className="aa-ItemContentDescription">
-                              Category: <strong>{item.category}</strong>
-                            </div>
-                          )}
-                          {item.price && (
-                            <div className="aa-ItemContentDescription" style={{ color: '#000' }}>
-                              <strong>${item.price.toLocaleString()}</strong>
-                            </div>
-                          )}
-                        </div>
+                        )}
+                        {item.category && (
+                          <div className="aa-ItemContentDescription">
+                            Category: <strong>{item.category}</strong>
+                          </div>
+                        )}
+                        {item.price && (
+                          <div
+                            className="aa-ItemContentDescription"
+                            style={{ color: "#000" }}
+                          >
+                            <strong>${item.price.toLocaleString()}</strong>
+                          </div>
+                        )}
                       </div>
-                      <div className="aa-ItemActions">
-                        <button
-                          className="aa-ItemActionButton aa-DesktopOnly aa-ActiveOnly"
-                          type="button"
-                          title="Select"
-                          style={{ pointerEvents: 'none' }}
+                    </div>
+                    <div className="aa-ItemActions">
+                      <button
+                        className="aa-ItemActionButton aa-DesktopOnly aa-ActiveOnly"
+                        type="button"
+                        title="Select"
+                        style={{ pointerEvents: "none" }}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="20"
+                          height="20"
+                          fill="currentColor"
                         >
-                          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                            <path d="M18.984 6.984h2.016v6h-15.188l3.609 3.609-1.406 1.406-6-6 6-6 1.406 1.406-3.609 3.609h13.172v-4.031z" />
-                          </svg>
-                        </button>
-                        {/* Add custom action button if needed */}
-                        <button
-                          className="aa-ItemActionButton"
-                          type="button"
-                          title="Add to favorites"
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            
-                            // Add your custom action here
-                            console.log('Item favorited:', item);
-                            
-                          }}
+                          <path d="M18.984 6.984h2.016v6h-15.188l3.609 3.609-1.406 1.406-6-6 6-6 1.406 1.406-3.609 3.609h13.172v-4.031z" />
+                        </svg>
+                      </button>
+                      {/* Add custom action button if needed */}
+                      <button
+                        className="aa-ItemActionButton"
+                        type="button"
+                        title="Add to favorites"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+
+                          // Add your custom action here
+                          console.log("Item favorited:", item);
+                        }}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="18"
+                          height="18"
+                          fill="currentColor"
                         >
-                          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                          </svg>
-                        </button>
-                      </div>
-                    </a>
-                  </div>
-                );
-              },
+                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </a>
+                </div>
+              );
             },
           },
-        ];
-      },
-    };
-  }
+        },
+      ];
+    },
+  };
+}
 
 // Updated Autocomplete component with conditional plugin loading
 export function Autocomplete({
@@ -480,7 +534,7 @@ export function Autocomplete({
   const [instantSearchUiState, setInstantSearchUiState] =
     useState<SetInstantSearchUiStateOptions>({ query });
   const [currentQuery, setCurrentQuery] = useState(query);
-  
+
   const debouncedSetInstantSearchUiState = debounce(
     setInstantSearchUiState,
     500
@@ -500,22 +554,29 @@ export function Autocomplete({
   // Create plugins conditionally based on query state
   const plugins = useMemo(() => {
     const recentSearches = createRecentSearchesPlugin(setInstantSearchUiState);
-    const querySuggestionsInCategory = createQuerySuggestionsInCategoryPluginLocal(
-      searchClient, 
-      currentCategory, 
-      setInstantSearchUiState
-    );
+    const querySuggestionsInCategory =
+      createQuerySuggestionsInCategoryPluginLocal(
+        searchClient,
+        currentCategory,
+        setInstantSearchUiState
+      );
     const querySuggestions = createQuerySuggestionsPluginLocal(
-      searchClient, 
-      currentCategory, 
+      searchClient,
+      currentCategory,
       setInstantSearchUiState
     );
-    
+
     // Always include both plugins, but they'll handle empty/non-empty queries internally
     const hitPlugin = createHitPlugin(searchClient);
     const merchPlugin = createMerchPlugin(searchClient);
 
-    return [recentSearches, querySuggestionsInCategory, querySuggestions, hitPlugin, merchPlugin];
+    return [
+      recentSearches,
+      querySuggestionsInCategory,
+      querySuggestions,
+      hitPlugin,
+      merchPlugin,
+    ];
   }, [currentCategory, searchClient]);
 
   useEffect(() => {
@@ -530,10 +591,11 @@ export function Autocomplete({
       insights: true,
       plugins,
       openOnFocus: true,
+      detachedMediaQuery: "(max-width: 768px)",
       defaultActiveItemId: 0,
       onReset() {
-        setInstantSearchUiState({ query: '', category: currentCategory });
-        setCurrentQuery('');
+        setInstantSearchUiState({ query: "", category: currentCategory });
+        setCurrentQuery("");
       },
       onSubmit({ state }) {
         setInstantSearchUiState({ query: state.query });
@@ -548,43 +610,48 @@ export function Autocomplete({
         }
       },
       renderer: { createElement, Fragment, render: () => {} },
-      render({ children, elements }, root) {
+      render({ elements }, root) {
         if (!panelRootRef.current || rootRef.current !== root) {
           rootRef.current = root;
-      
+
           panelRootRef.current?.unmount();
           panelRootRef.current = createRoot(root);
         }
-      
+
         const leftSources = [];
         const rightSources = [];
-      
+
         if (elements) {
           for (const [key, value] of Object.entries(elements)) {
-            if (key === 'recentSearchesPlugin' || key.includes('querySuggestions')) {
+            if (
+              key === "recentSearchesPlugin" ||
+              key.includes("querySuggestions")
+            ) {
               leftSources.push(value);
-            } else if (key === 'hitPlugin' || key === 'merchPlugin') {
+            } else if (key === "hitPlugin" || key === "merchPlugin") {
               rightSources.push(value);
             }
           }
         }
-      
-        const styleTag = createElement('style', {
+
+        const styleTag = createElement("style", {
           dangerouslySetInnerHTML: {
             __html: `
               /* Make the autocomplete panel much wider than the input and use Tailwind-like approach */
-              .aa-Panel {
-                width: 800px !important;
-                max-width: 90vw !important;
-                min-width: 600px !important;
-                left: 50% !important;
-                transform: translateX(-50%) !important;
-                margin-top: 0.5rem !important;
-                border-radius: 0.75rem !important;
-                box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
-                border: 1px solid rgb(229 231 235) !important;
-                background: white !important;
-                z-index: 50 !important;
+              @media screen and (min-width: 769px) {
+                .aa-Panel {
+                  width: 800px !important;
+                  max-width: 90vw !important;
+                  min-width: 600px !important;
+                  left: 50% !important;
+                  transform: translateX(-50%) !important;
+                  margin-top: 0.5rem !important;
+                  border-radius: 0.75rem !important;
+                  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+                  border: 1px solid rgb(229 231 235) !important;
+                  background: white !important;
+                  z-index: 50 !important;
+                }
               }
 
               .aa-PanelSections {
@@ -704,7 +771,7 @@ export function Autocomplete({
             `,
           },
         });
-      
+
         panelRootRef.current.render(
           <div className="aa-PanelLayout aa-Panel--scrollable">
             {styleTag}
@@ -718,7 +785,7 @@ export function Autocomplete({
             </div>
           </div>
         );
-      }      
+      },
     });
 
     return () => autocompleteInstance.destroy();
