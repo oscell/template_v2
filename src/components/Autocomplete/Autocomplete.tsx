@@ -258,14 +258,11 @@ function createHitPlugin(searchClient: SearchClient) {
                 </Fragment>
               );
             },
-            item({ item, components }) {
+            item({ item }) {
               return (
-                <div className="aa-ItemWrapper flex flex-col items-center">
-                  <a
-                    href={item.url || `/items/${item.objectID}`}
-                    className="aa-ItemLink"
-                  >
-                    <div className="aa-ItemContent">
+                <div className="aa-ItemWrapper">
+                  <a href={item.url} className="aa-ItemLink">
+                    <div className="aa-ItemContent  flex flex-col items-center">
                       <div className="aa-ItemIcon aa-ItemIcon--picture aa-ItemIcon--alignTop">
                         <img
                           src={
@@ -274,8 +271,6 @@ function createHitPlugin(searchClient: SearchClient) {
                             "/placeholder-image.jpg"
                           }
                           alt={item.name || item.title || "Item"}
-                          width="40"
-                          height="40"
                         />
                       </div>
                       <div className="aa-ItemContentBody">
@@ -288,11 +283,15 @@ function createHitPlugin(searchClient: SearchClient) {
                           </div>
                         )}
                         <div className="aa-ItemContentTitle">
-                          {components ? (
-                            <components.Snippet hit={item} attribute="name" />
-                          ) : (
-                            item.name || item.title
-                          )}
+                          <div
+                            className="aa-ItemContentTitle" 
+                            dangerouslySetInnerHTML={{
+                              __html:
+                                item._snippetResult?.name?.value ||
+                                item.name ||
+                                item.title,
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -511,76 +510,12 @@ export function Autocomplete({
                   z-index: 50 !important;
                 }
               }
-
-              .aa-PanelSections {
-                display: flex;
-                gap: 1.5rem;
-                padding: 1.5rem;
-              }
-      
-              .aa-PanelSection {
-                display: flex;
-                flex-direction: column;
-              }
-      
-              .aa-PanelSection--left {
-                width: 35%;
-                min-width: 200px;
-              }
-      
-              .aa-PanelSection--right {
-                width: 65%;
-                flex: 1;
-              }
-      
               .aa-Source[data-autocomplete-source-id='hitPlugin'] .aa-List,
               .aa-Source[data-autocomplete-source-id='merchPlugin'] .aa-List {
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
                 gap: 1rem;
-              }
-      
-              .aa-Source[data-autocomplete-source-id='hitPlugin'] .aa-ItemWrapper,
-              .aa-Source[data-autocomplete-source-id='merchPlugin'] .aa-ItemWrapper {
-                padding: 0.75rem;
-                border-radius: 0.5rem;
-                transition: background-color 0.15s ease-in-out;
-              }
 
-              .aa-Source[data-autocomplete-source-id='hitPlugin'] .aa-ItemWrapper:hover,
-              .aa-Source[data-autocomplete-source-id='merchPlugin'] .aa-ItemWrapper:hover {
-                background-color: rgb(249 250 251);
-              }
-              /* Style the left section sources */
-              .aa-PanelSection--left .aa-Source {
-                margin-bottom: 1rem;
-              }
-
-              .aa-PanelSection--left .aa-SourceHeaderTitle {
-                font-weight: 600;
-                color: rgb(55 65 81);
-                font-size: 0.875rem;
-                margin-bottom: 0.5rem;
-              }
-
-              .aa-PanelSection--left .aa-Item {
-                padding: 0.5rem 0.75rem;
-                border-radius: 0.375rem;
-                transition: background-color 0.15s ease-in-out;
-                color: rgb(75 85 99);
-              }
-
-              .aa-PanelSection--left .aa-Item:hover,
-              .aa-PanelSection--left .aa-Item[aria-selected="true"] {
-                background-color: rgb(243 244 246);
-              }
-
-              /* Right section header styling */
-              .aa-PanelSection--right .aa-SourceHeaderTitle {
-                font-weight: 600;
-                color: rgb(55 65 81);
-                font-size: 1rem;
-                margin-bottom: 1rem;
               }
       
               /* Responsive design */
@@ -591,21 +526,9 @@ export function Autocomplete({
                   left: 2.5vw !important;
                   transform: none !important;
                 }
-
-                .aa-PanelSections {
-                  flex-direction: column;
-                  padding: 1rem;
-                  gap: 1rem;
-                }
-      
-                .aa-PanelSection--left,
-                .aa-PanelSection--right {
-                  width: 100%;
-                }
-      
                 .aa-Source[data-autocomplete-source-id='hitPlugin'] .aa-List,
                 .aa-Source[data-autocomplete-source-id='merchPlugin'] .aa-List {
-                  grid-template-columns: repeat(2, 1fr);
+                  
                 }
               }
 
@@ -619,14 +542,15 @@ export function Autocomplete({
           },
         });
 
+
         panelRootRef.current.render(
           <div className="aa-PanelLayout aa-Panel--scrollable">
             {styleTag}
-            <div className="aa-PanelSections">
-              <div className="aa-PanelSection aa-PanelSection--left">
+            <div className="aa-PanelSections flex gap-1.5 p-1.5">
+              <div className="aa-PanelSection aa-PanelSection--left flex flex-col p-1 gap-1 w-1/3 min-w-[200px]">
                 {leftSources}
               </div>
-              <div className="aa-PanelSection aa-PanelSection--right">
+              <div className="aa-PanelSection aa-PanelSection--right flex flex-col p-1 gap-1 flex-1 w-2/3">
                 {rightSources}
               </div>
             </div>
